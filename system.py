@@ -35,8 +35,6 @@ def find_k_nearest_neighbours(training_data, test_data,k):
 
     return neighbours
 
-def
-
 ## WORK ON THIS FUNCTION
 def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> List[str]:
     ## Add the k value with the default of 3 for now
@@ -57,8 +55,15 @@ def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> L
     """
     n_test = test.shape[0]
     labels = []
+    ## Set a default value of K=3 for now will do test later to pick a better value
     
-    return ["."] * n_images
+    for i in range(n_test):
+        neighbours = find_k_nearest_neighbour(train,test[i],k=3)
+        neighbour_labels = [neighbor[-1] for neighbor in neighbors]
+        predicted_label = max(set(neighbour_labels), key=neighbour_labels.count)
+        labels.append(predicted_label)
+    
+    return labels
 
 # The functions below must all be provided in your solution. Think of them
 # as an API that it used by the train.py and evaluate.py programs.
