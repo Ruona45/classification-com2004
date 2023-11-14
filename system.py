@@ -15,8 +15,31 @@ import numpy as np
 
 N_DIMENSIONS = 10
 
+""" Helper Functions """
+def euclidean_distance(x1,x2):
+     """Calculate the Euclidean distance between two points."""
+    return np.sqrt(np.sum((x1-x2)**2))
+
+def find_k_nearest_neighbours(training_data, test_data,k):
+    distances = []
+    neighbours = []
+    for test_data in training_data:
+        distance = euclidean_distance(test_data,training_data)
+        distances.append((test_data,distance))
+        
+        # Sort distances in ascending order to find the nearest neighbors
+        distances.sort(key=lambda x:x[1])
+         # Select the k nearest neighbors
+         for i in range(k):
+             neighbours.append(distances[i][0])
+
+    return neighbours
+
+def
+
 ## WORK ON THIS FUNCTION
 def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> List[str]:
+    ## Add the k value with the default of 3 for now
     """Classify a set of feature vectors using a training set.
 
     This dummy implementation simply returns the empty square label ('.')
@@ -32,9 +55,10 @@ def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> L
     Returns:
         list[str]: A list of one-character strings representing the labels for each square.
     """
-    n_images = test.shape[0]
+    n_test = test.shape[0]
+    labels = []
+    
     return ["."] * n_images
-
 
 # The functions below must all be provided in your solution. Think of them
 # as an API that it used by the train.py and evaluate.py programs.
