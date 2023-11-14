@@ -8,13 +8,14 @@ produce a very poor result.
 
 version: v1.0
 """
+
 from typing import List
 
 import numpy as np
 
 N_DIMENSIONS = 10
 
-
+## WORK ON THIS FUNCTION
 def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> List[str]:
     """Classify a set of feature vectors using a training set.
 
@@ -43,7 +44,7 @@ def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> L
 # list of parameters and return types) must not be changed. The trivial implementations
 # below are provided as examples and will produce a result, but the score will be low.
 
-
+## WORK ON THIS FUNCTION
 def reduce_dimensions(data: np.ndarray, model: dict) -> np.ndarray:
     """Reduce the dimensionality of a set of feature vectors down to N_DIMENSIONS.
 
@@ -61,7 +62,7 @@ def reduce_dimensions(data: np.ndarray, model: dict) -> np.ndarray:
     reduced_data = data[:, 0:N_DIMENSIONS]
     return reduced_data
 
-
+## WORK ON THIS FUNCTION
 def process_training_data(fvectors_train: np.ndarray, labels_train: np.ndarray) -> dict:
     """Process the labeled training data and return model parameters stored in a dictionary.
 
@@ -81,8 +82,9 @@ def process_training_data(fvectors_train: np.ndarray, labels_train: np.ndarray) 
     # then the model will need to store the dimensionally-reduced training data and labels.
     model = {}
     model["labels_train"] = labels_train.tolist()
-    fvectors_train_reduced = reduce_dimensions(fvectors_train, model)
-    model["fvectors_train"] = fvectors_train_reduced.tolist()
+    # fvectors_train_reduced = reduce_dimensions(fvectors_train, model)
+    # Not reducing the dimensionality yet. so just the feature vectors as is
+    model["fvectors_train"] = fvectors_train.tolist()
     return model
 
 
@@ -105,7 +107,7 @@ def images_to_feature_vectors(images: List[np.ndarray]) -> np.ndarray:
 
     return fvectors
 
-
+## WORK ON THIS FUNCTION
 def classify_squares(fvectors_test: np.ndarray, model: dict) -> List[str]:
     """Run classifier on a array of image feature vectors presented in an arbitrary order.
 
