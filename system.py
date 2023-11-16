@@ -17,10 +17,13 @@ import scipy.linalg
 N_DIMENSIONS = 10
 
 """ Helper Functions """
-def euclidean_distance(x1,x2):
-     """Calculate the Euclidean distance between two points."""
-     value = np.sqrt(np.sum((x1-x2)**2))
-     return value
+# def euclidean_distance(x1,x2):
+#      """Calculate the Euclidean distance between two points."""
+#      value = np.sqrt(np.sum((x1-x2)**2))
+#      return value
+
+def manhattan_distance(x1,x2):
+    return
 
 def find_k_nearest_neighbours(training_data: np.ndarray, test_data: np.ndarray, k: int):
     distances = []
