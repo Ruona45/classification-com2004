@@ -12,31 +12,43 @@ version: v1.0
 from typing import List
 
 import numpy as np
+import scipy.linalg
 
 N_DIMENSIONS = 10
 
 """ Helper Functions """
 def euclidean_distance(x1,x2):
      """Calculate the Euclidean distance between two points."""
-    return np.sqrt(np.sum((x1-x2)**2))
+     value = np.sqrt(np.sum((x1-x2)**2))
+     return value
 
-def find_k_nearest_neighbours(training_data, test_data,k):
+def find_k_nearest_neighbours(training_data: np.ndarray, test_data: np.ndarray, k: int):
     distances = []
     neighbours = []
-    for test_data in training_data:
-        distance = euclidean_distance(test_data,training_data)
-        distances.append((test_data,distance))
-        
-        # Sort distances in ascending order to find the nearest neighbors
-        distances.sort(key=lambda x:x[1])
-         # Select the k nearest neighbors
-         for i in range(k):
-             neighbours.append(distances[i][0])
+    
+    for train_data in training_data:
+        distance = euclidean_distance(test_data, train_data)
+        distances.append((train_data, distance))
+
+    # Sort distances in ascending order to find the nearest neighbors
+    distances.sort(key=lambda x: x[1])
+
+    # Select the k nearest neighbors
+    for i in range(k):
+        neighbours.append(distances[i][0])
 
     return neighbours
+## With K=3
+# """ Running evaluation with the clean data.
+# Square mode: score = 70.8% correct
+# Board mode: score = 70.8% correct
+# Running evaluation with the noisy data.
+# Square mode: score = 57.6% correct
+# Board mode: score = 57.6% correct  """
+
 
 ## WORK ON THIS FUNCTION
-def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> List[str]:
+def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray, k=6) -> List[str]:
     ## Add the k value with the default of 3 for now
     """Classify a set of feature vectors using a training set.
 
@@ -49,17 +61,20 @@ def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> L
         train (np.ndarray): 2-D array storing the training feature vectors.
         train_labels (np.ndarray): 1-D array storing the training labels.
         test (np.ndarray): 2-D array storing the test feature vectors.
+        k (int): Number of nearest neighbors to consider 
 
     Returns:
         list[str]: A list of one-character strings representing the labels for each square.
     """
-    n_test = test.shape[0]
+    
     labels = []
     ## Set a default value of K=3 for now will do test later to pick a better value
     
-    for i in range(n_test):
-        neighbours = find_k_nearest_neighbour(train,test[i],k=3)
-        neighbour_labels = [neighbor[-1] for neighbor in neighbors]
+    for i in range(test.shape[0]):
+        test_instance = test[i]
+        neighbours = find_k_nearest_neighbours(train,test_instance,k)
+        neighbour_indices = [np.where((train == neighbour).all(axis=1))[0][0] for neighbour in neighbours]
+        neighbour_labels = [train_labels[idx] for idx in neighbour_indices]
         predicted_label = max(set(neighbour_labels), key=neighbour_labels.count)
         labels.append(predicted_label)
     
@@ -74,7 +89,7 @@ def classify(train: np.ndarray, train_labels: np.ndarray, test: np.ndarray) -> L
 # below are provided as examples and will produce a result, but the score will be low.
 
 ## WORK ON THIS FUNCTION
-def reduce_dimensions(data: np.ndarray, model: dict) -> np.ndarray:
+def reduce_dimensions(data: np.ndarray, model: dict, n_components=N_DIMENSIONS) -> np.ndarray:
     """Reduce the dimensionality of a set of feature vectors down to N_DIMENSIONS.
 
     The feature vectors are stored in the rows of 2-D array data, (i.e., a data matrix).
@@ -87,8 +102,34 @@ def reduce_dimensions(data: np.ndarray, model: dict) -> np.ndarray:
     Returns:
         np.ndarray: The reduced feature vectors.
     """
-
-    reduced_data = data[:, 0:N_DIMENSIONS]
+    # If already computed PCA use those values 
+    if "meanVals" in model and "redVects" in model:
+        meanVals = np.array(model["meanVals"])
+        reducedVects = np.array(model['reducedVects'])
+        centered_data = data - meanVals
+        reduced_data = np.dot(centered_data,reducedVects)
+    else: 
+        # Calculate the mean of the data along each feature dimension
+        meanVals = np.mean(data, axis=0)
+        centered_data = data - meanVals
+        
+        # Get the cov matrix
+        covx = np.cov(centered_data,rowvar=0)
+        
+        # Get the eigenvalues and eigenvectors
+        eigVals, eigVects = scipy.linalg.eigh(covx)
+        
+        # Sort eigenvectors in desceding order
+        idx = np.argsort(eigVals)[::-1]
+        eigVects = eigVects[:, idx]
+        
+        reducedVects = eigVects[:, :N_DIMENSIONS]
+        reduced_data = np.dot(centered_data,reducedVects)
+        
+        # Store mean and eigenvectors in the model for future use
+        model["meanVals"] = meanVals.tolist()
+        model["reducedVects"] = reducedVects.tolist()
+    
     return reduced_data
 
 ## WORK ON THIS FUNCTION
@@ -111,9 +152,8 @@ def process_training_data(fvectors_train: np.ndarray, labels_train: np.ndarray) 
     # then the model will need to store the dimensionally-reduced training data and labels.
     model = {}
     model["labels_train"] = labels_train.tolist()
-    # fvectors_train_reduced = reduce_dimensions(fvectors_train, model)
-    # Not reducing the dimensionality yet. so just the feature vectors as is
-    model["fvectors_train"] = fvectors_train.tolist()
+    fvectors_train_reduced = reduce_dimensions(fvectors_train, model)
+    model["fvectors_train"] = fvectors_train_reduced.tolist()
     return model
 
 
